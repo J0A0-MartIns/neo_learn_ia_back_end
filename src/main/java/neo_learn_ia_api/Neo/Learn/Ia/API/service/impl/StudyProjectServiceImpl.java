@@ -11,6 +11,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.service.FileService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.helpers.Helpers;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,12 +39,21 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
         studyProject.setName(dto.name());
         studyProject.setDescription(dto.description());
 
-        if (dto.file() != null && !dto.file().isEmpty()) {
-            FileEntity savedFileEntity = this.fileService.storeFile(dto.file(), "Study Project");
-            studyProject.getAttachments().add(savedFileEntity);
-        }
+        StudyProject savestudyProject =saveFile(dto.file(), studyProject);
 
-        return studyProjectRepository.save(studyProject);
+        return studyProjectRepository.save(savestudyProject);
+    }
+
+    private StudyProject saveFile(List<MultipartFile> file, StudyProject studyProject) throws IOException {
+        if (file != null && !file.isEmpty()) {
+            for (MultipartFile files : file) {
+                if(!file.isEmpty()){
+                    FileEntity savedFileEntity = this.fileService.storeFile(files, "Study Project");
+                    studyProject.getAttachments().add(savedFileEntity);
+                }
+            }
+        }
+        return studyProject;
     }
 
     @Override
@@ -91,12 +101,8 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
         studyProject.setDescription(dto.description());
         studyProject.setName(dto.name());
-        if (dto.file() != null && !dto.file().isEmpty()) {
-            FileEntity newFileEntity = this.fileService.storeFile(dto.file(), "StudyProject");
-            studyProject.getAttachments().add(newFileEntity);
-        }
-        this.studyProjectRepository.save(studyProject);
-
+        StudyProject savestudyProject =saveFile(dto.file(), studyProject);
+        this.studyProjectRepository.save(savestudyProject);
     }
 
     @Override
