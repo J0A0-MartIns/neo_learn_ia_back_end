@@ -36,10 +36,10 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
         this.helpers.validationName(dto.name());
 
         StudyProject studyProject = new StudyProject();
-        studyProject.setName(dto.name());
-        studyProject.setDescription(dto.description());
 
-        StudyProject savestudyProject =saveFile(dto.file(), studyProject);
+        helpers.copyFields(dto, studyProject);
+
+        StudyProject savestudyProject = saveFile(dto.file(), studyProject);
 
         return studyProjectRepository.save(savestudyProject);
     }

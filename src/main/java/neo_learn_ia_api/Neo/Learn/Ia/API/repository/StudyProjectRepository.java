@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface StudyProjectRepository  extends JpaRepository<StudyProject, UUID> {
+    boolean existsByNameIgnoreCase(String name);
 }
