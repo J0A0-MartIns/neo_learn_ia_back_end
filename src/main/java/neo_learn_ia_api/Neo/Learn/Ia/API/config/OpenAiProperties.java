@@ -16,5 +16,6 @@ public class OpenAiProperties {
     private String responsesEndpoint;
     private String filesEndpoint;
     private String key;
+    private String model;
 
 }

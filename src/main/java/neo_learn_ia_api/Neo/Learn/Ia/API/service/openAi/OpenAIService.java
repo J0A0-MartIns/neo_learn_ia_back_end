@@ -10,10 +10,5 @@ import java.util.List;
 public interface OpenAIService {
     Mono<String> getChatCompletion(String prompt);
 
-     <T> Mono<T> analyzeFiles(
-            List<MultipartFile> files,
-            String instruction,
-            JsonResponseFormat format,
-            Class<T> responseType
-    ) throws IOException;
+     Mono<String> getChatCompletionWithFile(MultipartFile file, String prompt) throws IOException;
 }

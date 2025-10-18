@@ -2,6 +2,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
 
 import lombok.AllArgsConstructor;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.AnalizeDocumentWithAI;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.openAi.OpenAIService;
@@ -18,23 +19,12 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
 
     private final OpenAIService openAIService;
 
-    @Override
-    public <T> Mono<T> analyzeFilesAndReturnStudyTopics(
-            List<MultipartFile> files,
-            JsonResponseFormat format,
-            Class<T> responseType
-    ) throws IOException {
+    public Mono<String> generateMultipleChoiceQuestions(MultipartFile file) throws IOException {
+        String prompt = "Baseado no arquivo no file_id enviado, gere 5 questões de múltipla escolha com 4 alternativas cada e forneça a resposta correta. "
+                + "Responda apenas em JSON no seguinte formato: "
+                + "[{\"question\": \"...\", \"options\": [\"A\", \"B\", \"C\", \"D\"], \"answer\": \"A\"}]\n\n";
 
-        if (files == null || files.isEmpty()) {
-            return Mono.empty();
-        }
-
-        String promptIa = "Analise os arquivos enviados e retorne os principais tópicos de estudo em formato JSON.";
-
-        JsonResponseFormat usedFormat = (format == JsonResponseFormat.STUDY_TOPICS)
-                ? JsonResponseFormat.JSON_SCHEMA
-                : format;
-
-        return openAIService.analyzeFiles(files, promptIa, usedFormat, responseType);
+        return this.openAIService.getChatCompletionWithFile(file,prompt);
     }
+
 }

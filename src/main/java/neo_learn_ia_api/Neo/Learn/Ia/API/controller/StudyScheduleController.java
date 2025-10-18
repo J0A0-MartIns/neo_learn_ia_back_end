@@ -1,6 +1,9 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyTopicsResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.AnalizeDocumentWithAI;
@@ -18,19 +21,22 @@ import java.util.List;
 public class StudyScheduleController {
 
     private final AnalizeDocumentWithAI analyzeFiles;
+    private final ObjectMapper objectMapper;
 
-    @PostMapping(
-            value = "/analyze-study-topics",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public Mono<StudyTopicsResponse> analyzeStudyTopics(
-            @RequestPart("files") List<MultipartFile> files
-    ) throws IOException {
-        return this.analyzeFiles.analyzeFilesAndReturnStudyTopics(
-                files,
-                JsonResponseFormat.STUDY_TOPICS,
-                StudyTopicsResponse.class
-        );
+    @PostMapping(value = "/generate-questions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<List<MultipleChoiceQuizResponse>> generateQuestions(@RequestPart("file") MultipartFile file) {
+        try {
+            return analyzeFiles.generateMultipleChoiceQuestions(file)
+                    .map(responseJson -> {
+                        try {
+                            return objectMapper.readValue(responseJson, new TypeReference<List<MultipleChoiceQuizResponse>>() {});
+                        } catch (Exception e) {
+                            throw new RuntimeException("Erro ao processar JSON do GPT: " + e.getMessage(), e);
+                        }
+                    });
+        } catch (Exception e) {
+            return Mono.error(e);
+        }
     }
+
 }

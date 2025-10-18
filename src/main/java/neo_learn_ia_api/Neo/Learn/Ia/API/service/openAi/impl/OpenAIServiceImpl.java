@@ -9,6 +9,8 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ChatRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ChatResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.openAi.OpenAIService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -25,18 +27,15 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     private final WebClient webClient;
     private final OpenAiProperties properties;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final JsonSchemaGenerator schemaGenerator;
 
     public OpenAIServiceImpl(WebClient openAIWebClient, OpenAiProperties properties) {
         this.webClient = openAIWebClient;
         this.properties = properties;
-        this.schemaGenerator = new JsonSchemaGenerator(objectMapper);
     }
 
     public Mono<String> getChatCompletion(String prompt) {
         ChatRequest request = new ChatRequest(
-                "gpt-4-mini",
+                properties.getModel(),
                 List.of(new ChatRequest.Message("user", prompt))
         );
 
@@ -48,53 +47,6 @@ public class OpenAIServiceImpl implements OpenAIService {
                 .map(resp -> resp.choices().get(0).message().content());
     }
 
-    public <T> Mono<T> analyzeFiles(
-            List<MultipartFile> files,
-            String instruction,
-            JsonResponseFormat format,
-            Class<T> responseType
-    ) throws IOException {
-
-        List<String> fileIds = new ArrayList<>();
-        for (MultipartFile file : files) {
-            fileIds.add(uploadFile(file));
-        }
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", "gpt-4.1-mini");
-        body.put("input", instruction);
-        body.put("file_ids", fileIds);
-
-        switch (format) {
-            case JSON -> body.put("response_format", Map.of("type", "json"));
-            case JSON_SCHEMA -> body.put("response_format", Map.of(
-                    "type", "json_schema",
-                    "json_schema", Map.of(
-                            "name", "custom_schema",
-                            "schema", generateJsonSchema(responseType)
-                    )
-            ));
-            default -> {}
-        }
-
-        return webClient.post()
-                .uri(properties.getResponsesEndpoint())
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .map(json -> {
-                    JsonNode output = json.get("output").get(0).get("content").get(0).get("text");
-                    if (format == JsonResponseFormat.TEXT) {
-                        return (T) output.asText();
-                    }
-                    try {
-                        return objectMapper.readValue(output.toString(), responseType);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Erro ao converter resposta JSON", e);
-                    }
-                });
-    }
 
     private String uploadFile(MultipartFile file) throws IOException {
         ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
@@ -116,12 +68,27 @@ public class OpenAIServiceImpl implements OpenAIService {
         return response.get("id").asText();
     }
 
-    private Map<String, Object> generateJsonSchema(Class<?> clazz) {
-        try {
-            JsonSchema schema = schemaGenerator.generateSchema(clazz);
-            return objectMapper.convertValue(schema, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao gerar JSON Schema para " + clazz.getSimpleName(), e);
-        }
+    public Mono<String> getChatCompletionWithFile(MultipartFile file, String prompt) throws IOException {
+        String fileId = uploadFile(file);
+
+        Map<String, Object> messageContent = new HashMap<>();
+        messageContent.put("role", "user");
+        messageContent.put("content", List.of(
+                Map.of("type", "input_text", "text", prompt),
+                Map.of("type", "input_file", "file_id", fileId)
+        ));
+
+        Map<String, Object> requestPayload = new HashMap<>();
+        requestPayload.put("model", properties.getModel());
+        requestPayload.put("input", List.of(messageContent));
+
+        return webClient.post()
+                .uri(properties.getResponsesEndpoint())
+                .header("Authorization", "Bearer " + properties.getKey())
+                .bodyValue(requestPayload)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .map(resp -> resp.get("output").get(0).get("content").get(0).get("text").asText());
     }
+
 }
