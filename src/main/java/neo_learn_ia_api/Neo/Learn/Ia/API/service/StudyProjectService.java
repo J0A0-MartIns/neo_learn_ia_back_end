@@ -13,10 +13,10 @@ import java.util.UUID;
 public interface StudyProjectService {
     StudyProject save(CreateStudyProjectDto dto) throws IOException;
 
-    StudyProjectResponseDto getStudyProjectById(UUID id);
+    StudyProjectResponseDto getStudyProjectById(Long id);
     List<StudyProjectResponseDto> getAllStudyProject();
-    void deleteStudyProjectById(UUID id);
-    void updateStudyProject(UUID id, CreateStudyProjectDto dto) throws IOException;
-    void deleteFileFromProject(UUID id, Long fileId);
+    void deleteStudyProjectById(Long id);
+    void updateStudyProject(Long id, CreateStudyProjectDto dto) throws IOException;
+    void deleteFileFromProject(Long id, Long fileId);
 
 }

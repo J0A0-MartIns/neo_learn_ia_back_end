@@ -37,7 +37,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional()
-    public FileEntity getFileById(UUID id) {
+    public FileEntity getFileById(Long id) {
         return fileRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Arquivo não encontrado com o ID: " + id));
     }
@@ -45,12 +45,12 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional()
-    public void deleteFile(UUID id) {
+    public void deleteFile(Long id) {
         fileRepository.deleteById(id);
     }
 
     @Override
-    public FileEntity updateFile(UUID fileId, MultipartFile file) throws IOException {
+    public FileEntity updateFile(Long fileId, MultipartFile file) throws IOException {
         FileEntity existingFile = fileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("Arquivo não encontrado para atualização: " + fileId));
 

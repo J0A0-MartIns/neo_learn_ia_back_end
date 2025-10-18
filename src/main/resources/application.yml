@@ -1,0 +1,44 @@
+jwt:
+  public:
+    key: classpath:app.pub
+  private:
+    key: classpath:app.key
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+
+spring:
+  application:
+    name: Neo-Learn-Ia-API
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/neo_learn
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+openai:
+  api:
+    base-url: https://api.openai.com/v1
+    chat-endpoint: /chat/completions
+    responses-endpoint: /responses
+    files-endpoint: /files
+    key: sk-xxxxxx
