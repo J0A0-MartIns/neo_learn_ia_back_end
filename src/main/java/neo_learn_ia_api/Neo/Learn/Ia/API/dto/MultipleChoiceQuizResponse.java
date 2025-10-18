@@ -1,14 +1,19 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
-@Getter
-@Setter
-public class MultipleChoiceQuizResponse {
-    private String question;
-    private List<String> options;
-    private String answer;
+import neo_learn_ia_api.Neo.Learn.Ia.API.model.MultipleChoiceQuestionEntity;
 
+public record MultipleChoiceQuizResponse(
+        String question,
+        List<String> options,
+        String answer
+) {
+    public static MultipleChoiceQuizResponse fromEntity(MultipleChoiceQuestionEntity entity) {
+        return new MultipleChoiceQuizResponse(
+                entity.getQuestion(),
+                entity.getOptions(),
+                entity.getAnswer()
+        );
+    }
 }

@@ -5,15 +5,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
-import java.util.UUID;
 @Entity
 @Table(name = "multiple_choice_questions")
 @Data
 public class MultipleChoiceQuestionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Column(nullable = false, length = 1000)
     private String question;
