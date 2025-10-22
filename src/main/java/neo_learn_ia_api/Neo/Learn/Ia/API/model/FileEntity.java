@@ -2,12 +2,11 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.model;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
+
 
 @Entity
 @Getter
@@ -17,9 +16,9 @@ import java.util.UUID;
 public class FileEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY )
     @Column(name = "id")
-    private UUID id;
+    private Long id;
 
     @Column(name = "file_name")
     private String fileName;

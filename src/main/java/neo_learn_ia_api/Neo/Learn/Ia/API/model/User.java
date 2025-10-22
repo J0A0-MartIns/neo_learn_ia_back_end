@@ -7,7 +7,6 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.dto.LoginRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -16,9 +15,9 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private UUID id;
+    private Long id;
 
     @Column(unique = true)
     private String userEmail;

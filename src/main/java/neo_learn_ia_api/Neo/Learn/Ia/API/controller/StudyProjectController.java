@@ -42,7 +42,7 @@ public class StudyProjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateStudyProject(@PathVariable UUID id,CreateStudyProjectDto dto){
+    public ResponseEntity<String> updateStudyProject(@PathVariable Long id,CreateStudyProjectDto dto){
         try{
             this.studyProjectService.updateStudyProject(id, dto);
             return ResponseEntity.ok("O projeto com ID " + id + " foi atualizado com sucesso.");
@@ -53,13 +53,13 @@ public class StudyProjectController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteStudyProject(@PathVariable UUID id){
+    public ResponseEntity<String> deleteStudyProject(@PathVariable Long id){
         this.studyProjectService.deleteStudyProjectById(id);
         return ResponseEntity.ok("O projeto com ID " + id + " foi excluído com sucesso.");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StudyProjectResponseDto> getStudyProjectById(@PathVariable UUID id){
+    public ResponseEntity<StudyProjectResponseDto> getStudyProjectById(@PathVariable Long id){
         StudyProjectResponseDto response =  this.studyProjectService.getStudyProjectById(id);
         return  ResponseEntity.ok(response);
     }

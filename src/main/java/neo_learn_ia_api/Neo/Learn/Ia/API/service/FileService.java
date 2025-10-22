@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface FileService {
 
     FileEntity storeFile(MultipartFile file, String origin)throws IOException;
-    FileEntity getFileById(UUID id);
-    void deleteFile(UUID id);
-    FileEntity updateFile(UUID fileId, MultipartFile file) throws IOException;
+    FileEntity getFileById(Long id);
+    void deleteFile(Long id);
+    FileEntity updateFile(Long fileId, MultipartFile file) throws IOException;
 }

@@ -83,7 +83,7 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
     }
 
     @Override
-    public StudyProjectResponseDto getStudyProjectById(UUID id) {
+    public StudyProjectResponseDto getStudyProjectById(Long id) {
         StudyProject entity = studyProjectRepository.findById(id).orElse(null);
         if (entity == null) {
             return null;
@@ -92,11 +92,11 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
     }
 
     @Override
-    public void deleteStudyProjectById(UUID id) {
+    public void deleteStudyProjectById(Long id) {
         studyProjectRepository.deleteById(id);
     }
     @Override
-    public void updateStudyProject(UUID id, CreateStudyProjectDto dto)  throws IOException{
+    public void updateStudyProject(Long id, CreateStudyProjectDto dto)  throws IOException{
         StudyProject studyProject = studyProjectRepository.findById(id)
                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
         studyProject.setDescription(dto.description());
@@ -106,7 +106,7 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
     }
 
     @Override
-    public void deleteFileFromProject(UUID id, Long fileId) {
+    public void deleteFileFromProject(Long id, Long fileId) {
         StudyProject studyProject = studyProjectRepository.findById(id)
                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
 

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record StudyProjectResponseDto(
-        UUID id,
+        Long id,
         String name,
         String description,
         List<FileMetadataDto> attachments

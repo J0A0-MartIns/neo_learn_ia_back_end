@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -14,8 +13,9 @@ import java.util.UUID;
 public class StudyProject {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY )
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;

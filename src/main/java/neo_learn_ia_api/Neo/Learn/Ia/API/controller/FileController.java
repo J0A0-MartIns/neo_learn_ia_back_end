@@ -19,7 +19,7 @@ public class FileController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> getFile(@PathVariable UUID id) {
+    public ResponseEntity<byte[]> getFile(@PathVariable Long id) {
         FileEntity fileEntity = fileService.getFileById(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(fileEntity.getFileType()));
@@ -28,7 +28,7 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFile(@PathVariable UUID id) {
+    public ResponseEntity<String> deleteFile(@PathVariable Long id) {
         this.fileService.deleteFile(id);
         return ResponseEntity.ok("Arquivo Deletado com sucesso.");
     }
