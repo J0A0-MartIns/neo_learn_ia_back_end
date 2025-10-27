@@ -12,4 +12,5 @@ public interface FileService {
     FileEntity getFileById(Long id);
     void deleteFile(Long id);
     FileEntity updateFile(Long fileId, MultipartFile file) throws IOException;
+    FileEntity buildFileEntity(MultipartFile file, String origin) throws IOException;
 }

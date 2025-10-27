@@ -1,114 +1,100 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
 import jakarta.transaction.Transactional;
+
+import neo_learn_ia_api.Neo.Learn.Ia.API.Exceptions.FileStorageException;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.FileMetadataDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.AbstractGenericService;
+import neo_learn_ia_api.Neo.Learn.Ia.API.mapper.StudyProjectMapper;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudyProject;
 import neo_learn_ia_api.Neo.Learn.Ia.API.repository.StudyProjectRepository;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.FileService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
-import neo_learn_ia_api.Neo.Learn.Ia.API.service.helpers.Helpers;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
-public class StudyProjectServiceImpl  implements StudyProjectService {
+public class StudyProjectServiceImpl extends AbstractGenericService<
+        StudyProject,
+        Long,
+        CreateStudyProjectDto,
+        StudyProjectResponseDto,
+        StudyProjectRepository
+        > implements StudyProjectService {
 
-    private final StudyProjectRepository studyProjectRepository;
     private final FileService fileService;
-    private final Helpers helpers;
+    private final StudyProjectMapper mapper;
 
-    public StudyProjectServiceImpl(StudyProjectRepository studyProjectRepository, FileService fileService, Helpers helpers) {
-        this.studyProjectRepository = studyProjectRepository;
+    public StudyProjectServiceImpl(StudyProjectRepository repository,
+                                   FileService fileService,
+                                   StudyProjectMapper mapper) {
+        super(repository);
         this.fileService = fileService;
-        this.helpers = helpers;
+        this.mapper = mapper;
     }
 
-    @Override()
-    public StudyProject save (CreateStudyProjectDto dto) throws IOException {
-        this.helpers.validationName(dto.name());
 
-        StudyProject studyProject = new StudyProject();
-
-        helpers.copyFields(dto, studyProject);
-
-        StudyProject savestudyProject = saveFile(dto.file(), studyProject);
-
-        return studyProjectRepository.save(savestudyProject);
+    @Override
+    protected StudyProject toEntity(CreateStudyProjectDto inputDTO) {
+        return mapper.toEntity(inputDTO);
     }
 
-    private StudyProject saveFile(List<MultipartFile> file, StudyProject studyProject) throws IOException {
-        if (file != null && !file.isEmpty()) {
-            for (MultipartFile files : file) {
-                if(!file.isEmpty()){
-                    FileEntity savedFileEntity = this.fileService.storeFile(files, "Study Project");
-                    studyProject.getAttachments().add(savedFileEntity);
-                }
-            }
+    @Override
+    protected StudyProjectResponseDto toResponseDTO(StudyProject entity) {
+        return mapper.toResponseDTO(entity);
+    }
+
+    @Override
+    protected void updateEntityFromDTO(StudyProject entity, CreateStudyProjectDto inputDTO) {
+        mapper.updateEntityFromDTO(entity, inputDTO);
+    }
+
+
+    @Override
+    public StudyProjectResponseDto create(CreateStudyProjectDto dto) {
+        validateProject(dto);
+
+        StudyProject studyProject = toEntity(dto);
+
+        try {
+            attachFilesToProject(dto.file(), studyProject);
+        } catch (IOException e) {
+            throw new FileStorageException("Falha ao processar arquivos para o projeto.", e);
         }
-        return studyProject;
+
+        StudyProject savedProject = repository.save(studyProject);
+
+        return toResponseDTO(savedProject);
     }
 
     @Override
-    public List<StudyProjectResponseDto> getAllStudyProject() {
-        List<StudyProject> projects = studyProjectRepository.findAll();
+    public StudyProjectResponseDto update(Long id, CreateStudyProjectDto dto) {
+        validateProject(dto);
 
-        return projects.stream()
-                .map(this::convertToDto)
-                .toList();
-    }
+        StudyProject studyProject = findEntityById(id);
 
-    private StudyProjectResponseDto convertToDto(StudyProject project) {
-        List<FileMetadataDto> attachmentDtos = project.getAttachments().stream()
-                .map(file -> new FileMetadataDto(
-                        file.getId(),
-                        file.getFileName(),
-                        file.getFileType(),
-                        file.getOrigin()))
-                .toList();
+        updateEntityFromDTO(studyProject, dto);
 
-        return new StudyProjectResponseDto(
-                project.getId(),
-                project.getName(),
-                project.getDescription(),
-                attachmentDtos
-        );
-    }
-
-    @Override
-    public StudyProjectResponseDto getStudyProjectById(Long id) {
-        StudyProject entity = studyProjectRepository.findById(id).orElse(null);
-        if (entity == null) {
-            return null;
+        try {
+            attachFilesToProject(dto.file(), studyProject);
+        } catch (IOException e) {
+            throw new FileStorageException("Falha ao processar novos arquivos para o projeto.", e);
         }
-        return convertToDto(entity);
-    }
 
-    @Override
-    public void deleteStudyProjectById(Long id) {
-        studyProjectRepository.deleteById(id);
-    }
-    @Override
-    public void updateStudyProject(Long id, CreateStudyProjectDto dto)  throws IOException{
-        StudyProject studyProject = studyProjectRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
-        studyProject.setDescription(dto.description());
-        studyProject.setName(dto.name());
-        StudyProject savestudyProject =saveFile(dto.file(), studyProject);
-        this.studyProjectRepository.save(savestudyProject);
+        StudyProject updatedProject = repository.save(studyProject);
+
+        return toResponseDTO(updatedProject);
     }
 
     @Override
     public void deleteFileFromProject(Long id, Long fileId) {
-        StudyProject studyProject = studyProjectRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
+        StudyProject studyProject = findEntityById(id);
 
         FileEntity fileEntityToDelete = studyProject.getAttachments().stream()
                 .filter(file -> file.getId().equals(fileId))
@@ -116,8 +102,29 @@ public class StudyProjectServiceImpl  implements StudyProjectService {
                 .orElseThrow(() -> new RuntimeException("Arquivo com ID " + fileId + " não encontrado neste projeto."));
 
         studyProject.getAttachments().remove(fileEntityToDelete);
-
-        studyProjectRepository.save(studyProject);
+        repository.save(studyProject);
     }
 
+
+
+    private void validateProject(CreateStudyProjectDto dto) {
+        if (dto.name() == null || dto.name().trim().isEmpty()) {
+            throw new IllegalArgumentException("O nome do projeto não pode ser nulo ou vazio.");
+        }
+    }
+
+    private void attachFilesToProject(List<MultipartFile> files, StudyProject studyProject) throws IOException {
+        if (files == null || files.isEmpty()) {
+            return;
+        }
+
+        for (MultipartFile file : files) {
+            if (file != null && !file.isEmpty()) {
+                FileEntity newFile = this.fileService.buildFileEntity(file, "Study Project");
+
+                studyProject.getAttachments().add(newFile);
+
+            }
+        }
+    }
 }

@@ -30,6 +30,7 @@ public class FileEntity {
     private String origin;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] data;
 
 

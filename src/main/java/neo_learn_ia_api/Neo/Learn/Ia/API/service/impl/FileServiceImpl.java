@@ -23,16 +23,24 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileEntity storeFile(MultipartFile file, String origin) throws IOException {
+        FileEntity fileEntity = buildFileEntity(file, origin);
+        return fileRepository.save(fileEntity);
+    }
+
+    @Override
+    public FileEntity buildFileEntity(MultipartFile file, String origin) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-        FileEntity fileEntity = new FileEntity(
+        if (file.isEmpty()) {
+            throw new IOException("Falha ao processar arquivo vazio: " + fileName);
+        }
+
+        return new FileEntity(
                 fileName,
                 file.getContentType(),
                 origin,
                 file.getBytes()
         );
-
-        return fileRepository.save(fileEntity);
     }
 
     @Override
