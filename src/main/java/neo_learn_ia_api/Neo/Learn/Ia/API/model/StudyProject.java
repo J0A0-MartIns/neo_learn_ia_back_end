@@ -3,6 +3,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import neo_learn_ia_api.Neo.Learn.Ia.API.validation.annotations.DomainNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class StudyProject {
     @Column(name = "id")
     private Long id;
 
+    @DomainNotBlank(message = "O nome do projeto não pode ser nulo ou vazio")
     @Column(name = "name", nullable = false)
     private String name;
 
