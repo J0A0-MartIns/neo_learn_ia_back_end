@@ -1,6 +1,7 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.GenericService;
+import neo_learn_ia_api.Neo.Learn.Ia.API.validation.DomainValidator;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -60,6 +61,7 @@ public abstract class AbstractGenericService<
     @Override
     public R create(I inputDTO) {
         E entity = toEntity(inputDTO);
+        DomainValidator.validateOrThrow(entity);
         E savedEntity = repository.save(entity);
         return toResponseDTO(savedEntity);
     }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.LoginRequest;
+import neo_learn_ia_api.Neo.Learn.Ia.API.validation.annotations.DomainNotNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
@@ -19,11 +20,14 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
+    @DomainNotNull(message = "Email não pode ser nulo")
     @Column(unique = true)
     private String userEmail;
 
+    @DomainNotNull(message = "Senha não poder ser nulo")
     private String password;
 
+    @DomainNotNull(message = "O primeiro nome não pode ser nulo")
     private String userFirstName;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
