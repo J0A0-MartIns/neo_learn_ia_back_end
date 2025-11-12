@@ -48,7 +48,7 @@ public class AdminUserConfig  implements CommandLineRunner {
                 user -> System.out.println("admin ja existe"),
                 () -> {
                     var user = new User();
-                    user.setUserEmail("admin");
+                    user.setUserEmail("admin@dev.com");
                     user.setPassword(passwordEncoder.encode("#neo321"));
                     user.setRoles(Set.of(finalAdminRole));
                     user.setUserFirstName("admin");

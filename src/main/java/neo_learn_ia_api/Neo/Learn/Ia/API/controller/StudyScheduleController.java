@@ -9,6 +9,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyTopicsResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.GenericController;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.MultipleChoiceQuestionEntity;
+import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudySchedule;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.AnalizeDocumentWithAI;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +44,12 @@ public class StudyScheduleController {
     }
 
     @PostMapping(value  = "/generate-schedule")
-    public Mono<String> generateSchedule(@RequestBody ScheduleRequest request) throws IOException {
+    public Mono<StudySchedule> generateSchedule(@RequestBody ScheduleRequest request) throws IOException {
         try {
-            return analyzeFiles.createScheduleWithFile(request)
-                    .then(Mono.just("Cronograma gerado com sucesso"));
+//            return analyzeFiles.createScheduleWithFile(request)
+//                    .then(Mono.just("Cronograma gerado com sucesso"));
+            return analyzeFiles.createScheduleWithFile(request);
+
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Erro ao processar o arquivo: " + e.getMessage(), e));
         }
