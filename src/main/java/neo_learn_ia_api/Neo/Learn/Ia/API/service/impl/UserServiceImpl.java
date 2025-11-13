@@ -13,6 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.UpdateUserDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.UserDto;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Set;
@@ -49,5 +53,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> listUsers() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public UserDto getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return new UserDto(
+                user.getId(),
+                user.getUserEmail(),
+                user.getUserFirstName(),
+                user.getTelefone(),
+                user.getCargo(),
+                user.getInstituicao()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void updateUser(Long userId, UpdateUserDto dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setUserFirstName(dto.userFirstName());
+        user.setTelefone(dto.telefone());
+        user.setCargo(dto.cargo());
+        user.setInstituicao(dto.instituicao());
+
+        userRepository.save(user);
     }
 }

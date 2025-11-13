@@ -30,6 +30,10 @@ public class User {
     @DomainNotNull(message = "O primeiro nome não pode ser nulo")
     private String userFirstName;
 
+    private String telefone;
+    private String cargo;
+    private String instituicao;
+
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "tb_users_roles",
