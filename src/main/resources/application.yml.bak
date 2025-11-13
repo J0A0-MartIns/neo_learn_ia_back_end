@@ -28,8 +28,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/neo_learn
-    username: postgres
-    password: 070501
+    username: admin
+    password: admin
     driver-class-name: org.postgresql.Driver
 
   servlet:
