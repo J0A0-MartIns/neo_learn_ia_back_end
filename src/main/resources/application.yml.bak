@@ -13,8 +13,8 @@ logging:
 spring:
   application:
     name: Neo-Learn-Ia-API
-  config:
-    import: optional:classpath:.env
+  #config:
+    #import: optional:classpath:.env
 
   sql:
     init:
@@ -28,8 +28,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/neo_learn
-    username: admin
-    password: admin
+    username: postgres
+    password: 070501
     driver-class-name: org.postgresql.Driver
 
   servlet:
