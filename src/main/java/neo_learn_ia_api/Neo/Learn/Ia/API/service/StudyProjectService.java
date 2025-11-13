@@ -25,4 +25,7 @@ public interface StudyProjectService extends GenericService<
 
 
     void deleteFileFromProject(Long id, Long fileId);
+
+    @Override
+    List<StudyProjectResponseDto> findAll();
 }

@@ -1,6 +1,6 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.Exceptions.FileStorageException;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
@@ -14,9 +14,12 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.service.FileService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -33,7 +36,7 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
 
     public StudyProjectServiceImpl(StudyProjectRepository repository,
                                    FileService fileService,
-                                   StudyProjectMapper mapper) {
+                                   @Qualifier("studyProjectMapperImpl")StudyProjectMapper mapper) {
         super(repository);
         this.fileService = fileService;
         this.mapper = mapper;
@@ -126,5 +129,14 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
 
             }
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudyProjectResponseDto> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }

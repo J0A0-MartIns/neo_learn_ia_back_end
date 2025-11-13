@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/study-project")
@@ -23,6 +24,12 @@ public class StudyProjectController extends GenericController<
         super(studyProjectService);
     }
 
+    @Override
+    @GetMapping
+    public ResponseEntity<List<StudyProjectResponseDto>> findAll() {
+        List<StudyProjectResponseDto> responseDTOs = service.findAll();
+        return ResponseEntity.ok(responseDTOs);
+    }
 
     @Override
     @PostMapping
