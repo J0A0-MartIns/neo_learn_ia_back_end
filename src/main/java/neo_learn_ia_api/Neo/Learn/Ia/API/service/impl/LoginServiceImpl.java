@@ -5,12 +5,14 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.dto.LoginResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.Role;
 import neo_learn_ia_api.Neo.Learn.Ia.API.repository.UserRepository;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.LoginService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -35,6 +37,10 @@ public class LoginServiceImpl implements LoginService {
 
         if (!user.isLoginCorrect(loginRequest, bCryptPasswordEncoder)) {
             throw new BadCredentialsException("Invalid username or password");
+        }
+
+        if (!user.isEmailVerificado()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você precisa confirmar seu e-mail antes de entrar.");
         }
 
         var now = Instant.now();

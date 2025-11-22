@@ -12,7 +12,10 @@ public interface UserService {
 
     void createUser(CreateUserDto createUserDto);
     List<User> listUsers();
-
     UserDto getUserProfile(Long userId);
     void updateUser(Long userId, UpdateUserDto updateUserDto);
+    void confirmEmail(String token);
+    void forgotPassword(String email);
+    void resetPassword(String token, String newPassword);
+    void updateEmail(Long userId, String newEmail);
 }
