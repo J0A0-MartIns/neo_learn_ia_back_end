@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.Exceptions.FileStorageException;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.AbstractGenericService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.mapper.StudyProjectMapper;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -105,7 +107,20 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         repository.save(studyProject);
     }
 
+    @Transactional()
+    public List<ProjectsForSheduleResponse> getProjectsForShedule() {
 
+        List<StudyProject> projects = repository.findAll();
+
+        return projects.stream()
+                .flatMap(project -> project.getAttachments().stream()
+                        .map(file -> mapper.toResponse(
+                                file,
+                                project.getId(),
+                                project.getName()
+                        )))
+                .collect(Collectors.toList());
+    }
 
     private void validateProject(CreateStudyProjectDto dto) {
         if (dto.name() == null || dto.name().trim().isEmpty()) {

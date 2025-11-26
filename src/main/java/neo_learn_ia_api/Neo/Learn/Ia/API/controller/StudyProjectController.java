@@ -1,6 +1,7 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.controller;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.GenericController;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
@@ -8,6 +9,8 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -51,4 +54,12 @@ public class StudyProjectController extends GenericController<
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/projects-for-shedule")
+    public ResponseEntity<List<ProjectsForSheduleResponse>> getProjectsForShedule() {
+        StudyProjectService projectService = (StudyProjectService) this.service;
+        List<ProjectsForSheduleResponse> response = projectService.getProjectsForShedule();
+        return ResponseEntity.ok(response);
+    }
+
 }

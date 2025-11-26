@@ -86,7 +86,7 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
                 Há um total de %d horas disponíveis por dia para estudo.
                 Retorne apenas um objeto JSON, sem texto explicativo.
                   {
-                    "totalWeeks": 3,
+                    "totalWeeks": %d,
                     "dailyStudyHours": %d,
                     "schedule": [
                       {
@@ -129,7 +129,11 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
                       }
                     ]
                   }
-                """, request.studyTimePerDay(), request.studyTimePerDay());
+                  IMPORTANT:
+                  Return the JSON ONLY, with no markdown fences, no explanations, no comments.
+                  Do not wrap the output in ``` or ```json.
+                  Return pure JSON only.
+                """, request.studyTimePerDay(), request.weeks(),request.studyTimePerDay());
 
         FileEntity fileEntity = fileRepository.findById(request.fileId())
                 .orElseThrow(() -> new RuntimeException("Arquivo não encontrado!"));
@@ -148,7 +152,6 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
                     try {
                         JsonNode root = objectMapper.readTree(responseJson);
 
-                        // logs dos campos mais importantes se existirem
                         if (root.has("totalWeeks")) {
                             logger.debug("JSON totalWeeks = {}", root.get("totalWeeks").asInt());
                         } else {

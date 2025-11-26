@@ -1,20 +1,17 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleRequest;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyTopicsResponse;
-import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
-import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.GenericController;
-import neo_learn_ia_api.Neo.Learn.Ia.API.model.MultipleChoiceQuestionEntity;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyScheduleResponseDTO;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudySchedule;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.AnalizeDocumentWithAI;
+import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyScheduleService;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.AbstractController;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -27,6 +24,7 @@ public class StudyScheduleController {
 
     private final AnalizeDocumentWithAI analyzeFiles;
     private final ObjectMapper objectMapper;
+    private final StudyScheduleService studyScheduleService;
 
     @PostMapping(value = "/generate-questions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<String> generateQuestions(@RequestPart("file") MultipartFile file) {
@@ -53,6 +51,11 @@ public class StudyScheduleController {
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Erro ao processar o arquivo: " + e.getMessage(), e));
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<StudyScheduleResponseDTO> getSchedule(@PathVariable Long id) {
+        return ResponseEntity.ok(studyScheduleService.getScheduleById(id));
     }
 
 }

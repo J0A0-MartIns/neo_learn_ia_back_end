@@ -2,6 +2,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.service;
 
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.GenericService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudyProject;
@@ -25,4 +26,6 @@ public interface StudyProjectService extends GenericService<
 
 
     void deleteFileFromProject(Long id, Long fileId);
+
+    List<ProjectsForSheduleResponse> getProjectsForShedule();
 }
