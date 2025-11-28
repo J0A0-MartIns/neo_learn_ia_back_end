@@ -28,8 +28,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/neo_learn
-    username: admin
-    password: admin
+    username: postgres
+    password: "070501"
     driver-class-name: org.postgresql.Driver
 
   servlet:
@@ -45,5 +45,24 @@ openai:
     files-endpoint: /files
     key:
     model: gpt-4.1-mini
+
+mail:
+    host: smtp.gmail.com
+    port: 587
+    username: araujo.commarcos@gmail.com
+    password: rnihirywvhkykhqx
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
+application:
+  mail:
+    sender: nao-responda@neolearnia.com
 
 

@@ -39,6 +39,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers( HttpMethod.POST,"/users").permitAll()
                         .requestMatchers( HttpMethod.POST,"/login").permitAll()
+                        .requestMatchers( HttpMethod.GET,"/users/confirm-email").permitAll()
+                        .requestMatchers( HttpMethod.POST,"/users/forgot-password").permitAll()
+                        .requestMatchers( HttpMethod.POST,"/users/reset-password").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()))

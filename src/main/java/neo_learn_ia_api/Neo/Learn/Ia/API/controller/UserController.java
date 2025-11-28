@@ -10,7 +10,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.dto.UserDto;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping( "/users")
@@ -49,5 +49,35 @@ public class UserController {
         Long userId = Long.parseLong(jwt.getSubject());
         userService.updateUser(userId, updateUserDto);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/me/email")
+    @PreAuthorize("hasAuthority('SCOPE_BASIC') or hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<Void> updateEmail(@AuthenticationPrincipal Jwt jwt, @RequestBody Map<String, String> payload) {
+        Long userId = Long.parseLong(jwt.getSubject());
+        String newEmail = payload.get("email");
+
+        userService.updateEmail(userId, newEmail);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/confirm-email")
+    public ResponseEntity<String> confirmEmail(@RequestParam("token") String token) {
+        userService.confirmEmail(token);
+        return ResponseEntity.ok("Email confirmado com sucesso!");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        userService.forgotPassword(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestParam("token") String token, @RequestBody Map<String, String> payload) {
+        String newPassword = payload.get("password");
+        userService.resetPassword(token, newPassword);
+        return ResponseEntity.ok().build();
     }
 }
