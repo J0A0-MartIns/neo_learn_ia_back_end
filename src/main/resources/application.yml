@@ -13,6 +13,20 @@ logging:
 spring:
   application:
     name: Neo-Learn-Ia-API
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: a@gmail.com
+    password: a
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
   #config:
     #import: optional:classpath:.env
 
@@ -45,21 +59,6 @@ openai:
     files-endpoint: /files
     key:
     model: gpt-4.1-mini
-
-mail:
-    host: smtp.gmail.com
-    port: 587
-    username: araujo.commarcos@gmail.com
-    password: rnihirywvhkykhqx
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          connectiontimeout: 5000
-          timeout: 3000
-          writetimeout: 5000
 
 application:
   mail:
