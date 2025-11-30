@@ -12,20 +12,17 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
 
-
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface StudyProjectMapper {
 
 
-
+    @Mapping(source = "owner.id", target = "ownerId")
     StudyProjectResponseDto toResponseDTO(StudyProject entity);
-
 
     List<StudyProjectResponseDto> toResponseDTOList(List<StudyProject> entities);
 
     FileMetadataDto fileEntityToFileMetadataDto(FileEntity fileEntity);
-
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "attachments", ignore = true)

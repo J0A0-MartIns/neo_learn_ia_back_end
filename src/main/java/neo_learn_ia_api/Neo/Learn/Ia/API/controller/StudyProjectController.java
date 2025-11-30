@@ -4,12 +4,13 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.GenericController;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
+import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/study-project")
@@ -24,21 +25,18 @@ public class StudyProjectController extends GenericController<
         super(studyProjectService);
     }
 
-    @Override
-    @GetMapping
-    public ResponseEntity<List<StudyProjectResponseDto>> findAll() {
-        List<StudyProjectResponseDto> responseDTOs = service.findAll();
-        return ResponseEntity.ok(responseDTOs);
-    }
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StudyProjectResponseDto> create(
+            @ModelAttribute CreateStudyProjectDto inputDTO,
+            @AuthenticationPrincipal Jwt jwt) {
 
-    @Override
-    @PostMapping
-    public ResponseEntity<StudyProjectResponseDto> create(@ModelAttribute CreateStudyProjectDto inputDTO) {
+        Long ownerId = Long.parseLong(jwt.getSubject());
 
-        StudyProjectResponseDto responseDTO = service.create(inputDTO);
+        StudyProjectService projectService = (StudyProjectService) this.service;
+        StudyProjectResponseDto responseDTO = projectService.create(inputDTO, ownerId);
+
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
-
 
     @Override
     @PutMapping("/{id}")
