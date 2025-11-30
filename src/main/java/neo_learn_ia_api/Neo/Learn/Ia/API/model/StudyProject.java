@@ -30,6 +30,9 @@ public class StudyProject {
     @JoinColumn(name = "study_project_id")
     private List<FileEntity> attachments = new ArrayList<>();
 
+    @Column(name = "is_public", nullable = false)
+    private boolean isPublic = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
