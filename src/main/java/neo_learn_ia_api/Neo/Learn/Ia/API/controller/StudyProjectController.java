@@ -56,4 +56,21 @@ public class StudyProjectController extends GenericController<
 
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/publish")
+    public ResponseEntity<StudyProjectResponseDto> publish(@PathVariable Long id) {
+
+        StudyProjectService service = (StudyProjectService) this.service;
+
+        return ResponseEntity.ok(service.publish(id));
+    }
+
+    @PostMapping("/{id}/unpublish")
+    public ResponseEntity<StudyProjectResponseDto> unpublish(@PathVariable Long id) {
+
+        StudyProjectService service = (StudyProjectService) this.service;
+
+        return ResponseEntity.ok(service.unpublish(id));
+    }
+
 }

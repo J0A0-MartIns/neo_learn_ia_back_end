@@ -93,6 +93,8 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
                 .orElseThrow(() -> new RuntimeException("Owner not found with id " + ownerId));
         studyProject.setOwner(owner);
 
+        studyProject.setPublic(false);
+
         try {
             attachFilesToProject(dto.file(), studyProject);
         } catch (IOException e) {
@@ -166,5 +168,17 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    public StudyProjectResponseDto publish(Long id) {
+        StudyProject project = findEntityById(id);
+        project.setPublic(true);
+        return toResponseDTO(repository.save(project));
+    }
+
+    public StudyProjectResponseDto unpublish(Long id) {
+        StudyProject project = findEntityById(id);
+        project.setPublic(false);
+        return toResponseDTO(repository.save(project));
     }
 }

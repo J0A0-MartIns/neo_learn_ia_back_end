@@ -26,4 +26,7 @@ public interface StudyProjectService extends GenericService<
 
     @Override
     List<StudyProjectResponseDto> findAll();
+
+    StudyProjectResponseDto publish(Long id);
+    StudyProjectResponseDto unpublish(Long id);
 }
