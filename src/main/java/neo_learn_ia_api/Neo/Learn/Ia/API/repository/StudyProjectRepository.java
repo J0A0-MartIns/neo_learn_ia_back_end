@@ -8,4 +8,5 @@ import java.util.List;
 public interface StudyProjectRepository  extends JpaRepository<StudyProject, Long> {
     boolean existsByNameIgnoreCase(String name);
     List<StudyProject> findByOwnerId(Long ownerId);
+    List<StudyProject> findByOwnerIdNotAndIsPublicTrue(Long ownerId);
 }

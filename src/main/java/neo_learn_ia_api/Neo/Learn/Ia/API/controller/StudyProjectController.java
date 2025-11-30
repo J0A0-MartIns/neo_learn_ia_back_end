@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/study-project")
 public class StudyProjectController extends GenericController<
@@ -73,4 +75,13 @@ public class StudyProjectController extends GenericController<
         return ResponseEntity.ok(service.unpublish(id));
     }
 
+    @GetMapping("/public-library")
+    public ResponseEntity<List<StudyProjectResponseDto>> publicLibrary(@AuthenticationPrincipal Jwt jwt) {
+
+        Long currentUserId = Long.parseLong(jwt.getSubject());
+
+        StudyProjectService projectService = (StudyProjectService) this.service;
+
+        return ResponseEntity.ok(projectService.findPublicLibrary(currentUserId));
+    }
 }

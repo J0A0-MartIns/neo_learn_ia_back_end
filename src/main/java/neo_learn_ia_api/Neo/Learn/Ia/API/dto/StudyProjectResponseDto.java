@@ -8,5 +8,6 @@ public record StudyProjectResponseDto(
         String name,
         String description,
         List<FileMetadataDto> attachments,
+        String ownerName,
         Long ownerId
 ) {}

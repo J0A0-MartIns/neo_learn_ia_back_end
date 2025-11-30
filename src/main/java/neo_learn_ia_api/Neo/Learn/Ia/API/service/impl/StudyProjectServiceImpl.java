@@ -181,4 +181,12 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         project.setPublic(false);
         return toResponseDTO(repository.save(project));
     }
+
+    @Override
+    public List<StudyProjectResponseDto> findPublicLibrary(Long currentUserId) {
+        return repository.findByOwnerIdNotAndIsPublicTrue(currentUserId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 }

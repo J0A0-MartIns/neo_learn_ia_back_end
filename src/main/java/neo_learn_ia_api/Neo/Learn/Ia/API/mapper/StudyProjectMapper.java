@@ -17,7 +17,8 @@ import java.util.List;
 public interface StudyProjectMapper {
 
 
-    @Mapping(source = "owner.id", target = "ownerId")
+    @Mapping(target = "ownerName", source = "owner.firstName")
+    @Mapping(target = "ownerId", source = "owner.id")
     StudyProjectResponseDto toResponseDTO(StudyProject entity);
 
     List<StudyProjectResponseDto> toResponseDTOList(List<StudyProject> entities);
