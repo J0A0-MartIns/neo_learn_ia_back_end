@@ -154,7 +154,7 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         for (MultipartFile file : files) {
             if (file != null && !file.isEmpty()) {
                 FileEntity newFile = this.fileService.buildFileEntity(file, "Study Project");
-
+                newFile.setStudyProject(studyProject);
                 studyProject.getAttachments().add(newFile);
 
             }
