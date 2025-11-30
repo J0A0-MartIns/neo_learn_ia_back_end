@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers( HttpMethod.GET,"/users/confirm-email").permitAll()
                         .requestMatchers( HttpMethod.POST,"/users/forgot-password").permitAll()
                         .requestMatchers( HttpMethod.POST,"/users/reset-password").permitAll()
+                        .requestMatchers("/files/view/**").permitAll()
+                        .requestMatchers("/files/download-all/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()))
