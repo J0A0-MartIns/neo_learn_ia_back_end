@@ -28,5 +28,8 @@ public interface StudyProjectService extends GenericService<
     List<StudyProjectResponseDto> findAll();
 
     StudyProjectResponseDto publish(Long id);
+
     StudyProjectResponseDto unpublish(Long id);
+
+    List<StudyProjectResponseDto> findPublicLibrary(Long currentUserId);
 }
