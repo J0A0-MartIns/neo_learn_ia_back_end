@@ -16,4 +16,6 @@ public interface FileService {
     List<FileEntity> findByStudyProjectId(Long projectId);
 
     byte[] generateZipForProject(Long projectId);
+
+    FileEntity duplicateFile(FileEntity original);
 }

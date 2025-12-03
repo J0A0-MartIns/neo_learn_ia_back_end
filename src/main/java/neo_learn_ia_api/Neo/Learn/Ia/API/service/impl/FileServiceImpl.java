@@ -101,4 +101,20 @@ public class FileServiceImpl implements FileService {
             throw new RuntimeException("Erro ao gerar ZIP", e);
         }
     }
+
+    @Override
+    public FileEntity duplicateFile(FileEntity original) {
+        byte[] copiedData = original.getData() != null
+                ? original.getData().clone()
+                : null;
+
+        FileEntity copy = new FileEntity(
+                original.getFileName(),
+                original.getFileType(),
+                original.getOrigin(),
+                copiedData
+        );
+
+        return copy;
+    }
 }
