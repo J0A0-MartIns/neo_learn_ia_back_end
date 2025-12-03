@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import neo_learn_ia_api.Neo.Learn.Ia.API.validation.annotations.DomainNotBlank;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,4 +37,15 @@ public class StudyProject {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
+    @Column(name = "original_project_id", nullable = true)
+    private Long originalProjectId;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

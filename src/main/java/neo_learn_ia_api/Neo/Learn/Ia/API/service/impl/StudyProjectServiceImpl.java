@@ -198,12 +198,13 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         StudyProject copy = new StudyProject();
         copy.setName(original.getName());
         copy.setDescription(original.getDescription());
-
-        var newOwner = userRepository.findById(newOwnerId)
-                .orElseThrow(() -> new RuntimeException("Owner not found"));
-
-        copy.setOwner(newOwner);
         copy.setPublic(false);
+
+        copy.setOriginalProjectId(original.getId());
+
+        var owner = userRepository.findById(newOwnerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found"));
+        copy.setOwner(owner);
 
         copy.setAttachments(
                 original.getAttachments().stream().map(originalFile -> {
