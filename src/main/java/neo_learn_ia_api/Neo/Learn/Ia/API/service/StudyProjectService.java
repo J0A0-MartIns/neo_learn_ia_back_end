@@ -32,4 +32,7 @@ public interface StudyProjectService extends GenericService<
     StudyProjectResponseDto unpublish(Long id);
 
     List<StudyProjectResponseDto> findPublicLibrary(Long currentUserId);
+
+    StudyProjectResponseDto duplicate(Long id, Long newOwnerId);
+
 }

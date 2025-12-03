@@ -189,4 +189,33 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public StudyProjectResponseDto duplicate(Long id, Long newOwnerId) {
+
+        StudyProject original = findEntityById(id);
+
+        StudyProject copy = new StudyProject();
+        copy.setName(original.getName());
+        copy.setDescription(original.getDescription());
+
+        var newOwner = userRepository.findById(newOwnerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found"));
+
+        copy.setOwner(newOwner);
+        copy.setPublic(false);
+
+        copy.setAttachments(
+                original.getAttachments().stream().map(originalFile -> {
+                    FileEntity newFile = fileService.duplicateFile(originalFile);
+                    newFile.setStudyProject(copy);
+                    return newFile;
+                }).collect(Collectors.toList())
+        );
+
+        StudyProject saved = repository.save(copy);
+
+        return toResponseDTO(saved);
+    }
+
 }

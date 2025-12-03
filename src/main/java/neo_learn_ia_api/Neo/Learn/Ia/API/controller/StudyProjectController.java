@@ -84,4 +84,18 @@ public class StudyProjectController extends GenericController<
 
         return ResponseEntity.ok(projectService.findPublicLibrary(currentUserId));
     }
+
+    @PostMapping("/{id}/duplicate")
+    public ResponseEntity<StudyProjectResponseDto> duplicate(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        Long newOwnerId = Long.parseLong(jwt.getSubject());
+
+        StudyProjectService projectService = (StudyProjectService) this.service;
+        StudyProjectResponseDto response = projectService.duplicate(id, newOwnerId);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
