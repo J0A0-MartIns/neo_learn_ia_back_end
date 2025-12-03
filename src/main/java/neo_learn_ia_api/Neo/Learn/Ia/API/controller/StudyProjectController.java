@@ -98,4 +98,14 @@ public class StudyProjectController extends GenericController<
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/my-projects")
+    public ResponseEntity<List<StudyProjectResponseDto>> findMyProjects(
+            @AuthenticationPrincipal Jwt jwt) {
+
+        Long userId = Long.parseLong(jwt.getSubject());
+
+        StudyProjectService service = (StudyProjectService) this.service;
+
+        return ResponseEntity.ok(service.findByOwner(userId));
+    }
 }

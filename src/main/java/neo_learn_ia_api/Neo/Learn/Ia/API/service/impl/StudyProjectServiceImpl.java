@@ -218,4 +218,11 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         return toResponseDTO(saved);
     }
 
+    @Override
+    public List<StudyProjectResponseDto> findByOwner(Long ownerId) {
+        return repository.findByOwnerId(ownerId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 }
