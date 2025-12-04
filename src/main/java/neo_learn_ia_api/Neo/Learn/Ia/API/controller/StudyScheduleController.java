@@ -3,6 +3,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleGetResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyScheduleResponseDTO;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudySchedule;
@@ -42,10 +43,8 @@ public class StudyScheduleController {
     }
 
     @PostMapping(value  = "/generate-schedule")
-    public Mono<StudySchedule> generateSchedule(@RequestBody ScheduleRequest request) throws IOException {
+    public Mono<Long> generateSchedule(@RequestBody ScheduleRequest request) throws IOException {
         try {
-//            return analyzeFiles.createScheduleWithFile(request)
-//                    .then(Mono.just("Cronograma gerado com sucesso"));
             return analyzeFiles.createScheduleWithFile(request);
 
         } catch (Exception e) {
@@ -56,6 +55,17 @@ public class StudyScheduleController {
     @GetMapping("/{id}")
     public ResponseEntity<StudyScheduleResponseDTO> getSchedule(@PathVariable Long id) {
         return ResponseEntity.ok(studyScheduleService.getScheduleById(id));
+    }
+
+    @GetMapping
+    public List<ScheduleGetResponse> getAll(){
+        return studyScheduleService.getAllSchedule();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
+            studyScheduleService.deleteScheduleById(id);
+            return ResponseEntity.noContent().build();
     }
 
 }

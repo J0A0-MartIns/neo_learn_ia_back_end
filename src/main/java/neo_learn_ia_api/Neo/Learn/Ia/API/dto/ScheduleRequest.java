@@ -5,6 +5,7 @@ public record ScheduleRequest(
         Long studyProjectId,
         Long fileId,
         Long weeks,
-        Integer studyTimePerDay
+        Integer studyTimePerDay,
+        String title
 ) {
 }

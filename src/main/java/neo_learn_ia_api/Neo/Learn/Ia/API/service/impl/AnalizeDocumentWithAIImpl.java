@@ -78,10 +78,11 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
         );
     }
 
-    public Mono<StudySchedule> createScheduleWithFile(ScheduleRequest request) throws IOException {
+    public Mono<Long> createScheduleWithFile(ScheduleRequest request) throws IOException {
         String prompt = String.format("""
                 Baseado no arquivo no file_id enviado, avalie os tópicos de estudo e gera um cronograma levando as seguintes considerações:
-                O cronamgra terá duração de 3 semanas.
+                O cronamgra terá duração de no mínimo 1 semana e no maxímo 3 semanas.
+                Esse terá duração de %d semanas.
                 A distribuição de horas deve levar em conta a dificuldade de cada matéria.
                 Há um total de %d horas disponíveis por dia para estudo.
                 Retorne apenas um objeto JSON, sem texto explicativo.
@@ -133,7 +134,7 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
                   Return the JSON ONLY, with no markdown fences, no explanations, no comments.
                   Do not wrap the output in ``` or ```json.
                   Return pure JSON only.
-                """, request.studyTimePerDay(), request.weeks(),request.studyTimePerDay());
+                """, request.weeks(),request.studyTimePerDay(), request.weeks(),request.studyTimePerDay());
 
         FileEntity fileEntity = fileRepository.findById(request.fileId())
                 .orElseThrow(() -> new RuntimeException("Arquivo não encontrado!"));
@@ -174,11 +175,11 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
                         logger.info("Preparando para salvar StudySchedule - projectId={}, possibleTopicsCount={}",
                                 project.getId(),
                                 root.path("schedule").size());
-
+                        plan.setTitle(request.title());
                         return Mono.fromCallable(() -> {
                                     StudySchedule saved = studyScheduleRepository.save(plan);
                                     logger.info("StudySchedule salvo com sucesso - id={}, projectId={}", saved.getId(), project.getId());
-                                    return saved;
+                                    return saved.getId();
                                 })
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .doOnError(err -> logger.error("Erro ao salvar StudySchedule no repositório", err));

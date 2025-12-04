@@ -15,5 +15,5 @@ public interface AnalizeDocumentWithAI {
 
     Mono<List<MultipleChoiceQuestionEntity>> generateMultipleChoiceQuestions(MultipartFile file) throws IOException;
     Mono<List<MultipleChoiceQuizResponse>> getAllQuestions();
-    Mono<StudySchedule> createScheduleWithFile(ScheduleRequest request) throws IOException;
+    Mono<Long> createScheduleWithFile(ScheduleRequest request) throws IOException;
 }

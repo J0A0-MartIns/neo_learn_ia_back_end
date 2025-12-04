@@ -25,6 +25,8 @@ public class StudySchedule {
 
     private String userId;
 
+    private String title;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_project_id", nullable = false)
     private StudyProject project;
