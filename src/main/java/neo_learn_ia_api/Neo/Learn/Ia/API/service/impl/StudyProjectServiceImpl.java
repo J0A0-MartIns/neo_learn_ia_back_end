@@ -16,9 +16,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -66,24 +64,6 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
     }
 
     @Override
-    public StudyProjectResponseDto create(CreateStudyProjectDto dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
-            throw new RuntimeException("Usuário não autenticado ao criar projeto");
-        }
-
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Long ownerId;
-        try {
-            ownerId = Long.parseLong(jwt.getSubject());
-        } catch (NumberFormatException ex) {
-            throw new RuntimeException("Subject do JWT inválido para ownerId", ex);
-        }
-
-        return create(dto, ownerId);
-    }
-
-    @Override
     public StudyProjectResponseDto create(CreateStudyProjectDto dto, Long ownerId) {
         validateProject(dto);
 
@@ -92,18 +72,15 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         var owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new RuntimeException("Owner not found with id " + ownerId));
         studyProject.setOwner(owner);
-
         studyProject.setPublic(false);
 
         try {
             attachFilesToProject(dto.file(), studyProject);
         } catch (IOException e) {
-            throw new FileStorageException("Falha ao processar arquivos para o projeto.", e);
+            throw new FileStorageException("Falha ao processar arquivos.", e);
         }
 
-        StudyProject savedProject = repository.save(studyProject);
-
-        return toResponseDTO(savedProject);
+        return toResponseDTO(repository.save(studyProject));
     }
 
     @Override

@@ -35,9 +35,11 @@ public class StudyProjectController extends GenericController<
         Long ownerId = Long.parseLong(jwt.getSubject());
 
         StudyProjectService projectService = (StudyProjectService) this.service;
-        StudyProjectResponseDto responseDTO = projectService.create(inputDTO, ownerId);
 
-        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                projectService.create(inputDTO, ownerId),
+                HttpStatus.CREATED
+        );
     }
 
     @Override
