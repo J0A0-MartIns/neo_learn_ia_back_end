@@ -13,8 +13,22 @@ logging:
 spring:
   application:
     name: Neo-Learn-Ia-API
-  config:
-    import: optional:classpath:.env
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: a@gmail.com
+    password: a
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+  #config:
+    #import: optional:classpath:.env
 
   sql:
     init:
@@ -28,8 +42,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/neo_learn
-    username: admin
-    password: admin
+    username: postgres
+    password: "070501"
     driver-class-name: org.postgresql.Driver
 
   servlet:
@@ -45,5 +59,9 @@ openai:
     files-endpoint: /files
     key:
     model: gpt-4.1-mini
+
+application:
+  mail:
+    sender: nao-responda@neolearnia.com
 
 

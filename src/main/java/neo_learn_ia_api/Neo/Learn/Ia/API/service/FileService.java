@@ -4,7 +4,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.List;
 
 public interface FileService {
 
@@ -13,4 +13,9 @@ public interface FileService {
     void deleteFile(Long id);
     FileEntity updateFile(Long fileId, MultipartFile file) throws IOException;
     FileEntity buildFileEntity(MultipartFile file, String origin) throws IOException;
+    List<FileEntity> findByStudyProjectId(Long projectId);
+
+    byte[] generateZipForProject(Long projectId);
+
+    FileEntity duplicateFile(FileEntity original);
 }

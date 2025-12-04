@@ -1,7 +1,7 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.repository.FileRepository;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.FileService;
@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.UUID;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -50,7 +53,6 @@ public class FileServiceImpl implements FileService {
                 .orElseThrow(() -> new RuntimeException("Arquivo não encontrado com o ID: " + id));
     }
 
-
     @Override
     @Transactional()
     public void deleteFile(Long id) {
@@ -69,5 +71,50 @@ public class FileServiceImpl implements FileService {
         return fileRepository.save(existingFile);
     }
 
+    @Override
+    public List<FileEntity> findByStudyProjectId(Long projectId) {
+        return fileRepository.findByStudyProjectId(projectId);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] generateZipForProject(Long projectId) {
+
+        List<FileEntity> files = fileRepository.findByStudyProjectId(projectId);
+
+        if (files.isEmpty()) return new byte[0];
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+            for (FileEntity file : files) {
+                ZipEntry entry = new ZipEntry(file.getFileName());
+                zos.putNextEntry(entry);
+                zos.write(file.getData());
+                zos.closeEntry();
+            }
+
+            zos.finish();
+            return baos.toByteArray();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao gerar ZIP", e);
+        }
+    }
+
+    @Override
+    public FileEntity duplicateFile(FileEntity original) {
+        byte[] copiedData = original.getData() != null
+                ? original.getData().clone()
+                : null;
+
+        FileEntity copy = new FileEntity(
+                original.getFileName(),
+                original.getFileType(),
+                original.getOrigin(),
+                copiedData
+        );
+
+        return copy;
+    }
 }
