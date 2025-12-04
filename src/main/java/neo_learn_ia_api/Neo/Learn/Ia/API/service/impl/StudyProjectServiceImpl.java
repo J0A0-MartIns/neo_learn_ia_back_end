@@ -1,6 +1,6 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.Exceptions.FileStorageException;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
@@ -10,13 +10,18 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.mapper.StudyProjectMapper;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudyProject;
 import neo_learn_ia_api.Neo.Learn.Ia.API.repository.StudyProjectRepository;
+import neo_learn_ia_api.Neo.Learn.Ia.API.repository.UserRepository;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.FileService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,15 +35,18 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
 
     private final FileService fileService;
     private final StudyProjectMapper mapper;
+    private final UserRepository userRepository;
 
     public StudyProjectServiceImpl(StudyProjectRepository repository,
                                    FileService fileService,
-                                   StudyProjectMapper mapper) {
+                                   @Qualifier("studyProjectMapperImpl")StudyProjectMapper mapper,
+                                   UserRepository userRepository
+    ) {
         super(repository);
         this.fileService = fileService;
         this.mapper = mapper;
+        this.userRepository = userRepository;
     }
-
 
     @Override
     protected StudyProject toEntity(CreateStudyProjectDto inputDTO) {
@@ -55,22 +63,24 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         mapper.updateEntityFromDTO(entity, inputDTO);
     }
 
-
     @Override
-    public StudyProjectResponseDto create(CreateStudyProjectDto dto) {
+    public StudyProjectResponseDto create(CreateStudyProjectDto dto, Long ownerId) {
         validateProject(dto);
 
         StudyProject studyProject = toEntity(dto);
 
+        var owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found with id " + ownerId));
+        studyProject.setOwner(owner);
+        studyProject.setPublic(false);
+
         try {
             attachFilesToProject(dto.file(), studyProject);
         } catch (IOException e) {
-            throw new FileStorageException("Falha ao processar arquivos para o projeto.", e);
+            throw new FileStorageException("Falha ao processar arquivos.", e);
         }
 
-        StudyProject savedProject = repository.save(studyProject);
-
-        return toResponseDTO(savedProject);
+        return toResponseDTO(repository.save(studyProject));
     }
 
     @Override
@@ -121,10 +131,76 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         for (MultipartFile file : files) {
             if (file != null && !file.isEmpty()) {
                 FileEntity newFile = this.fileService.buildFileEntity(file, "Study Project");
-
+                newFile.setStudyProject(studyProject);
                 studyProject.getAttachments().add(newFile);
 
             }
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudyProjectResponseDto> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public StudyProjectResponseDto publish(Long id) {
+        StudyProject project = findEntityById(id);
+        project.setPublic(true);
+        return toResponseDTO(repository.save(project));
+    }
+
+    public StudyProjectResponseDto unpublish(Long id) {
+        StudyProject project = findEntityById(id);
+        project.setPublic(false);
+        return toResponseDTO(repository.save(project));
+    }
+
+    @Override
+    public List<StudyProjectResponseDto> findPublicLibrary(Long currentUserId) {
+        return repository.findByOwnerIdNotAndIsPublicTrue(currentUserId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public StudyProjectResponseDto duplicate(Long id, Long newOwnerId) {
+
+        StudyProject original = findEntityById(id);
+
+        StudyProject copy = new StudyProject();
+        copy.setName(original.getName());
+        copy.setDescription(original.getDescription());
+        copy.setPublic(false);
+
+        copy.setOriginalProjectId(original.getId());
+
+        var owner = userRepository.findById(newOwnerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found"));
+        copy.setOwner(owner);
+
+        copy.setAttachments(
+                original.getAttachments().stream().map(originalFile -> {
+                    FileEntity newFile = fileService.duplicateFile(originalFile);
+                    newFile.setStudyProject(copy);
+                    return newFile;
+                }).collect(Collectors.toList())
+        );
+
+        StudyProject saved = repository.save(copy);
+
+        return toResponseDTO(saved);
+    }
+
+    @Override
+    public List<StudyProjectResponseDto> findByOwner(Long ownerId) {
+        return repository.findByOwnerId(ownerId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }

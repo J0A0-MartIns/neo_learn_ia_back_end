@@ -2,11 +2,13 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.mapper;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.FileMetadataDto;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudyProject;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
 
@@ -31,12 +33,4 @@ public interface StudyProjectMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     void updateEntityFromDTO(@MappingTarget StudyProject entity, CreateStudyProjectDto dto);
-
-    @Mappings({
-            @Mapping(target = "studyProject", source = "studyProjectId"),
-            @Mapping(target = "studyProjectName", source = "studyProjectName"),
-            @Mapping(target = "fileId", source = "file.id"),
-            @Mapping(target = "fileName", source = "file.fileName")
-    })
-    ProjectsForSheduleResponse toResponse(FileEntity file, Long studyProjectId, String studyProjectName);
 }
