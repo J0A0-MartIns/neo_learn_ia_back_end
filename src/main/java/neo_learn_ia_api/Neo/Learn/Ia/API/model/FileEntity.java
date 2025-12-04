@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-
 @Entity
 @Getter
 @Setter
@@ -33,6 +31,9 @@ public class FileEntity {
     @Basic(fetch = FetchType.LAZY)
     private byte[] data;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "study_project_id")
+    private StudyProject studyProject;
 
     public FileEntity(String fileName, String fileType, String origin, byte[] data) {
         this.fileName = fileName;
