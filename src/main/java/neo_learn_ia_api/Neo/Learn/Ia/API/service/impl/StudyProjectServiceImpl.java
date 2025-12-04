@@ -4,6 +4,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.Exceptions.FileStorageException;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.AbstractGenericService;
 import neo_learn_ia_api.Neo.Learn.Ia.API.mapper.StudyProjectMapper;
@@ -201,6 +202,21 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
         return repository.findByOwnerId(ownerId)
                 .stream()
                 .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional()
+    public List<ProjectsForSheduleResponse> getProjectsForShedule(Long userId) {
+
+        List<StudyProject> projects = repository.findByOwnerId(userId);
+
+        return projects.stream()
+                .flatMap(project -> project.getAttachments().stream()
+                        .map(file -> mapper.toResponse(
+                                file,
+                                project.getId(),
+                                project.getName()
+                        )))
                 .collect(Collectors.toList());
     }
 }
