@@ -1,6 +1,7 @@
 package neo_learn_ia_api.Neo.Learn.Ia.API.controller;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.impl.GenericController;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyProjectService;
@@ -110,4 +111,13 @@ public class StudyProjectController extends GenericController<
 
         return ResponseEntity.ok(service.findByOwner(userId));
     }
+
+    @GetMapping("/projects-for-shedule")
+    public ResponseEntity<List<ProjectsForSheduleResponse>> getProjectsForShedule(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = Long.parseLong(jwt.getSubject());
+        StudyProjectService projectService = (StudyProjectService) this.service;
+        List<ProjectsForSheduleResponse> response = projectService.getProjectsForShedule(userId);
+        return ResponseEntity.ok(response);
+    }
+
 }

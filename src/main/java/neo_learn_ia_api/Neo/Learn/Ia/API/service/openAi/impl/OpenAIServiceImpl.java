@@ -8,6 +8,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.config.OpenAiProperties;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ChatRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ChatResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
+import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.openAi.OpenAIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import java.util.*;
 @Service
 public class OpenAIServiceImpl implements OpenAIService {
 
+    private static final Logger log = LoggerFactory.getLogger(OpenAIServiceImpl.class);
     private final WebClient webClient;
     private final OpenAiProperties properties;
 
@@ -32,6 +34,7 @@ public class OpenAIServiceImpl implements OpenAIService {
         this.webClient = openAIWebClient;
         this.properties = properties;
     }
+
 
     public Mono<String> getChatCompletion(String prompt) {
         ChatRequest request = new ChatRequest(
@@ -48,11 +51,11 @@ public class OpenAIServiceImpl implements OpenAIService {
     }
 
 
-    private String uploadFile(MultipartFile file) throws IOException {
-        ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+    private String uploadFileGeneric(byte[] data, String fileName, String contentType) throws IOException {
+        ByteArrayResource resource = new ByteArrayResource(data) {
             @Override
             public String getFilename() {
-                return file.getOriginalFilename();
+                return fileName;
             }
         };
 
@@ -65,12 +68,32 @@ public class OpenAIServiceImpl implements OpenAIService {
                 .bodyToMono(JsonNode.class)
                 .block();
 
-        return response.get("id").asText();
+        String fileId = response.get("id").asText();
+        log.info("Arquivo enviado com sucesso para OpenAI. file_id={}", fileId);
+        return fileId;
+    }
+
+    private String uploadFile(MultipartFile file) throws IOException {
+        return uploadFileGeneric(file.getBytes(), file.getOriginalFilename(), file.getContentType());
+    }
+
+
+    private String uploadFile(FileEntity fileEntity) throws IOException {
+        return uploadFileGeneric(fileEntity.getData(), fileEntity.getFileName(), fileEntity.getFileType());
     }
 
     public Mono<String> getChatCompletionWithFile(MultipartFile file, String prompt) throws IOException {
         String fileId = uploadFile(file);
+        return sendChatWithFile(fileId, prompt);
+    }
 
+
+    public Mono<String> getChatCompletionWithFile(FileEntity fileEntity, String prompt) throws IOException {
+        String fileId = uploadFile(fileEntity);
+        return sendChatWithFile(fileId, prompt);
+    }
+
+    private Mono<String> sendChatWithFile(String fileId, String prompt) {
         Map<String, Object> messageContent = new HashMap<>();
         messageContent.put("role", "user");
         messageContent.put("content", List.of(

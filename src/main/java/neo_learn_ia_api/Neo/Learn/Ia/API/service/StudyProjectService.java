@@ -2,6 +2,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.service;
 
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.CreateStudyProjectDto;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ProjectsForSheduleResponse;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyProjectResponseDto;
 import neo_learn_ia_api.Neo.Learn.Ia.API.genericCrud.GenericService;
 
@@ -36,4 +37,5 @@ public interface StudyProjectService extends GenericService<
     StudyProjectResponseDto duplicate(Long id, Long newOwnerId);
 
     List<StudyProjectResponseDto> findByOwner(Long ownerId);
+    List<ProjectsForSheduleResponse> getProjectsForShedule(Long userId);
 }
