@@ -2,10 +2,8 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleGetResponse;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleRequest;
-import neo_learn_ia_api.Neo.Learn.Ia.API.dto.StudyScheduleResponseDTO;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.*;
+import neo_learn_ia_api.Neo.Learn.Ia.API.model.MultipleChoiceQuestionEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudySchedule;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.AnalizeDocumentWithAI;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyScheduleService;
@@ -27,11 +25,10 @@ public class StudyScheduleController {
     private final ObjectMapper objectMapper;
     private final StudyScheduleService studyScheduleService;
 
-    @PostMapping(value = "/generate-questions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<String> generateQuestions(@RequestPart("file") MultipartFile file) {
+    @PostMapping(value = "/generate-questions")
+    public Mono<List<MultipleChoiceQuestionEntity>> generateQuestions(@RequestBody MultipleChoiceQuizRequest request) {
         try {
-            return analyzeFiles.generateMultipleChoiceQuestions(file)
-                    .then(Mono.just("Questões geradas e salvas com sucesso!"));
+            return analyzeFiles.generateMultipleChoiceQuestions(request);
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Erro ao processar o arquivo: " + e.getMessage(), e));
         }

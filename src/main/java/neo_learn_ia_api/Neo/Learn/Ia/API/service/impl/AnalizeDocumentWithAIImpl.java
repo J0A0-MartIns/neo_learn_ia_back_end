@@ -2,7 +2,9 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.service.impl;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.QuestionContent;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.FileEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudySchedule;
@@ -39,35 +41,67 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
     private final StudyProjectRepository studyProjectRepository;
     private static final Logger logger = LoggerFactory.getLogger(AnalizeDocumentWithAIImpl.class);
 
-    public Mono<List<MultipleChoiceQuestionEntity>> generateMultipleChoiceQuestions(MultipartFile file) throws IOException {
-        String prompt = "Baseado no arquivo no file_id enviado, gere 5 questões de múltipla escolha com 4 alternativas cada e forneça a resposta correta. "
-                + "Responda apenas em JSON no seguinte formato: "
-                + "[{\"question\": \"...\", \"options\": [\"A\", \"B\", \"C\", \"D\"], \"answer\": \"A\"}]\n\n";
+    public Mono<List<MultipleChoiceQuestionEntity>> generateMultipleChoiceQuestions(MultipleChoiceQuizRequest request) {
 
+        String prompt = "Baseado no arquivo do file_id enviado, gere 5 questões de múltipla escolha com 4 alternativas cada. "
+                + "Siga estritamente estas regras de formatação JSON:\n"
+                + "1. Responda APENAS com um Array JSON.\n"
+                + "2. No array 'options', forneça apenas o texto das alternativas. NÃO coloque prefixos como 'A.', 'B.', '1)' ou letras antes do texto.\n"
+                + "3. O campo 'answer' deve conter EXATAMENTE o mesmo texto (cópia fiel) da alternativa correta listada em 'options'. Não retorne apenas a letra.\n\n"
+                + "Exemplo do formato exigido:\n"
+                + "[{\"question\": \"Qual a cor do céu sem nuvens?\", \"options\": [\"Verde\", \"Azul\", \"Vermelho\", \"Amarelo\"], \"answer\": \"Azul\"}]";
 
-        return openAIService.getChatCompletionWithFile(file, prompt)
-                .flatMap(jsonResponse -> {
-                    try {
-                        List<MultipleChoiceQuestionEntity> questions = objectMapper.readValue(
-                                jsonResponse,
-                                new com.fasterxml.jackson.core.type.TypeReference<List<MultipleChoiceQuestionEntity>>() {
-                                }
-                        );
+        return Mono.zip(
+                Mono.justOrEmpty(fileRepository.findById(request.fileId()))
+                        .switchIfEmpty(Mono.error(new RuntimeException("Arquivo não encontrado!"))),
+                Mono.justOrEmpty(studyProjectRepository.findById(request.projectId()))
+                        .switchIfEmpty(Mono.error(new RuntimeException("Projeto não encontrado!")))
+        ).flatMap(tuple -> {
+            FileEntity fileEntity = tuple.getT1();
 
-                        logger.debug("Desserialização concluída. {} questões detectadas.", questions.size());
-                        for (int i = 0; i < questions.size(); i++) {
-                            MultipleChoiceQuestionEntity q = questions.get(i);
-                        }
+            try {
+                return openAIService.getChatCompletionWithFile(fileEntity, prompt);
+            } catch (IOException e) {
+                return Mono.error(new RuntimeException("Erro de leitura de arquivo ao chamar OpenAI: " + e.getMessage(), e));
+            }
 
-                        List<MultipleChoiceQuestionEntity> saved = repository.saveAll(questions);
-                        logger.debug("{} questões salvas no banco com sucesso.", saved.size());
+        }).flatMap(jsonResponse -> {
+            try {
+                List<QuestionContent> rawContents = objectMapper.readValue(
+                        jsonResponse,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<QuestionContent>>() {}
+                );
 
-                        return Mono.just(saved);
-                    } catch (Exception e) {
-                        logger.error("Erro ao processar e salvar questões", e);
-                        return Mono.error(new RuntimeException("Erro ao processar e salvar questões: " + e.getMessage(), e));
-                    }
-                });
+                List<MultipleChoiceQuestionEntity> entities = rawContents.stream()
+                        .map(content -> {
+                            String regexPrefix = "^[A-Ea-e][\\.\\)]\\s*";
+
+                            List<String> cleanOptions = content.options().stream()
+                                    .map(opt -> opt.replaceAll(regexPrefix, "").trim())
+                                    .toList();
+
+                            String cleanAnswer = content.answer().replaceAll(regexPrefix, "").trim();
+
+                            QuestionContent cleanContent = new QuestionContent(
+                                    content.question(),
+                                    cleanOptions,
+                                    cleanAnswer
+                            );
+
+                            return new MultipleChoiceQuestionEntity(cleanContent);
+                        })
+                        .toList();
+
+                List<MultipleChoiceQuestionEntity> saved = repository.saveAll(entities);
+                logger.debug("{} questões processadas e salvas com sucesso.", saved.size());
+
+                return Mono.just(saved);
+
+            } catch (Exception e) {
+                logger.error("Erro ao processar JSON ou salvar", e);
+                return Mono.error(new RuntimeException("Erro ao processar resposta da IA: " + e.getMessage(), e));
+            }
+        });
     }
 
     public Mono<List<MultipleChoiceQuizResponse>> getAllQuestions() {
