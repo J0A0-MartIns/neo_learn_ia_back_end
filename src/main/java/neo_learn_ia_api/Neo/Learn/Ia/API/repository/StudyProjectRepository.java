@@ -9,4 +9,5 @@ public interface StudyProjectRepository  extends JpaRepository<StudyProject, Lon
     boolean existsByNameIgnoreCase(String name);
     List<StudyProject> findByOwnerId(Long ownerId);
     List<StudyProject> findByOwnerIdNotAndIsPublicTrue(Long ownerId);
+    Long countByOriginalProjectId(Long originalProjectId);
 }

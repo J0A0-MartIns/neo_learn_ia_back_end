@@ -120,4 +120,9 @@ public class StudyProjectController extends GenericController<
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}/popularity")
+    public ResponseEntity<Long> getPopularity(@PathVariable Long id) {
+        StudyProjectService service = (StudyProjectService) this.service;
+        return ResponseEntity.ok(service.countClones(id));
+    }
 }

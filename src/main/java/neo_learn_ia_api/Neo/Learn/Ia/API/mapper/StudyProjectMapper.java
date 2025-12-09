@@ -18,6 +18,7 @@ public interface StudyProjectMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "ownerName", source = "owner.userFirstName")
     @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "isPublic", source = "public")
     StudyProjectResponseDto toResponseDTO(StudyProject entity);
 
     List<StudyProjectResponseDto> toResponseDTOList(List<StudyProject> entities);

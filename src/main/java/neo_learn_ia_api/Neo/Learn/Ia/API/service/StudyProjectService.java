@@ -37,5 +37,8 @@ public interface StudyProjectService extends GenericService<
     StudyProjectResponseDto duplicate(Long id, Long newOwnerId);
 
     List<StudyProjectResponseDto> findByOwner(Long ownerId);
+
     List<ProjectsForSheduleResponse> getProjectsForShedule(Long userId);
+
+    Long countClones(Long projectId);
 }
