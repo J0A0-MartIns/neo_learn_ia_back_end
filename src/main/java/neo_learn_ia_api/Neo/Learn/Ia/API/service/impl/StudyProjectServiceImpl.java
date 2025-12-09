@@ -219,4 +219,9 @@ public class StudyProjectServiceImpl extends AbstractGenericService<
                         )))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Long countClones(Long projectId) {
+        return repository.countByOriginalProjectId(projectId);
+    }
 }
