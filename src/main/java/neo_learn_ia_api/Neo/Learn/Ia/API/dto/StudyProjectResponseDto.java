@@ -11,5 +11,6 @@ public record StudyProjectResponseDto(
         String ownerName,
         Long ownerId,
         Long originalProjectId,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        Boolean isPublic
 ) {}
