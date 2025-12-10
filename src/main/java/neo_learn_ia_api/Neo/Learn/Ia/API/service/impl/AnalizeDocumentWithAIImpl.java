@@ -41,13 +41,14 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
     private final StudyProjectRepository studyProjectRepository;
     private static final Logger logger = LoggerFactory.getLogger(AnalizeDocumentWithAIImpl.class);
 
-    public Mono<List<MultipleChoiceQuestionEntity>> generateMultipleChoiceQuestions(MultipleChoiceQuizRequest request) {
+    public Mono<List<QuestionContent>> generateMultipleChoiceQuestions(MultipleChoiceQuizRequest request) {
 
-        String prompt = "Baseado no arquivo do file_id enviado, gere 5 questões de múltipla escolha com 4 alternativas cada. "
+        String prompt = "Baseado no arquivo do file_id enviado, gere 10 questões de múltipla escolha com 4 alternativas cada. "
                 + "Siga estritamente estas regras de formatação JSON:\n"
                 + "1. Responda APENAS com um Array JSON.\n"
                 + "2. No array 'options', forneça apenas o texto das alternativas. NÃO coloque prefixos como 'A.', 'B.', '1)' ou letras antes do texto.\n"
                 + "3. O campo 'answer' deve conter EXATAMENTE o mesmo texto (cópia fiel) da alternativa correta listada em 'options'. Não retorne apenas a letra.\n\n"
+                + "4. A posição da alternativa correta deve variar aleatoriamente entre as opções (não pode ficar sempre na primeira, segunda, etc).\n\n"
                 + "Exemplo do formato exigido:\n"
                 + "[{\"question\": \"Qual a cor do céu sem nuvens?\", \"options\": [\"Verde\", \"Azul\", \"Vermelho\", \"Amarelo\"], \"answer\": \"Azul\"}]";
 
@@ -72,37 +73,38 @@ public class AnalizeDocumentWithAIImpl implements AnalizeDocumentWithAI {
                         new com.fasterxml.jackson.core.type.TypeReference<List<QuestionContent>>() {}
                 );
 
-                List<MultipleChoiceQuestionEntity> entities = rawContents.stream()
+                String regexPrefix = "^[A-Ea-e][\\.\\)]\\s*";
+
+                List<QuestionContent> cleanContents = rawContents.stream()
                         .map(content -> {
-                            String regexPrefix = "^[A-Ea-e][\\.\\)]\\s*";
 
                             List<String> cleanOptions = content.options().stream()
                                     .map(opt -> opt.replaceAll(regexPrefix, "").trim())
                                     .toList();
 
-                            String cleanAnswer = content.answer().replaceAll(regexPrefix, "").trim();
+                            String cleanAnswer = content.answer()
+                                    .replaceAll(regexPrefix, "")
+                                    .trim();
 
-                            QuestionContent cleanContent = new QuestionContent(
+                            return new QuestionContent(
                                     content.question(),
                                     cleanOptions,
                                     cleanAnswer
                             );
-
-                            return new MultipleChoiceQuestionEntity(cleanContent);
                         })
                         .toList();
 
-                List<MultipleChoiceQuestionEntity> saved = repository.saveAll(entities);
-                logger.debug("{} questões processadas e salvas com sucesso.", saved.size());
+                logger.debug("{} questões processadas (sem persistência).", cleanContents.size());
 
-                return Mono.just(saved);
+                return Mono.just(cleanContents);
 
             } catch (Exception e) {
-                logger.error("Erro ao processar JSON ou salvar", e);
+                logger.error("Erro ao processar JSON da IA", e);
                 return Mono.error(new RuntimeException("Erro ao processar resposta da IA: " + e.getMessage(), e));
             }
         });
     }
+
 
     public Mono<List<MultipleChoiceQuizResponse>> getAllQuestions() {
         return Mono.fromSupplier(() ->

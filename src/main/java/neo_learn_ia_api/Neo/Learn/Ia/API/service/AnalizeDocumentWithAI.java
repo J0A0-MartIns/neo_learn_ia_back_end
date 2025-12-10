@@ -2,6 +2,7 @@ package neo_learn_ia_api.Neo.Learn.Ia.API.service;
 
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.MultipleChoiceQuizResponse;
+import neo_learn_ia_api.Neo.Learn.Ia.API.dto.QuestionContent;
 import neo_learn_ia_api.Neo.Learn.Ia.API.dto.ScheduleRequest;
 import neo_learn_ia_api.Neo.Learn.Ia.API.enums.JsonResponseFormat;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.MultipleChoiceQuestionEntity;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public interface AnalizeDocumentWithAI {
 
-     Mono<List<MultipleChoiceQuestionEntity>> generateMultipleChoiceQuestions(MultipleChoiceQuizRequest request);
+    Mono<List<QuestionContent>> generateMultipleChoiceQuestions(MultipleChoiceQuizRequest request);
     Mono<List<MultipleChoiceQuizResponse>> getAllQuestions();
     Mono<Long> createScheduleWithFile(ScheduleRequest request) throws IOException;
 }

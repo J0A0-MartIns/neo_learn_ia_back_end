@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .question {
+            margin-bottom: 25px;
+        }
+        .options {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Quiz - Projeto <span th:text="${projectId}"></span></h1>
+
+<div th:each="q, stat : ${questions}" class="question">
+    <h3>
+        <span th:text="${stat.index + 1}"></span>.
+        <span th:text="${q.question}"></span>
+    </h3>
+
+    <div class="options">
+        <div th:each="opt, i : ${q.options}">
+            <span th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', i.index, i.index + 1) + ') '}"></span>
+            <span th:text="${opt}"></span>
+        </div>
+    </div>
+
+    <p><strong>Resposta correta:</strong>
+        <span th:text="${q.answer}"></span>
+    </p>
+</div>
+
+</body>
+</html>

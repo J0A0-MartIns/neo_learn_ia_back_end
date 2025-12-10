@@ -21,14 +21,19 @@ public class MultipleChoiceQuestionEntity {
     @Column(name = "data", columnDefinition = "jsonb")
     private QuestionContent data;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id", nullable = false)
+    private FileEntity file;
+
     public MultipleChoiceQuestionEntity() {}
 
-    public MultipleChoiceQuestionEntity(QuestionContent data) {
+    public MultipleChoiceQuestionEntity(QuestionContent data, FileEntity file) {
         this.data = data;
+        this.file = file;
     }
 
     public long getId() { return id; }
     public QuestionContent getData() { return data; }
-    public void setData(QuestionContent data) { this.data = data; }
+    public FileEntity getFile() { return file; }
 }
 
