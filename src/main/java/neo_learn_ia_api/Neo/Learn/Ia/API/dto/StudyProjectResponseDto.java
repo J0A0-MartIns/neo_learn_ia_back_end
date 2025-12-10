@@ -12,5 +12,7 @@ public record StudyProjectResponseDto(
         Long ownerId,
         Long originalProjectId,
         LocalDateTime createdAt,
-        Boolean isPublic
+        Boolean isPublic,
+        Integer views,
+        Integer likes
 ) {}

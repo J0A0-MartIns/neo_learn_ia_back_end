@@ -38,6 +38,12 @@ public class StudyProject {
     @Column(name = "is_public", nullable = false)
     private boolean isPublic = false;
 
+    @Column(name = "views")
+    private Integer views = 0;
+
+    @Column(name = "likes")
+    private Integer likes = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
