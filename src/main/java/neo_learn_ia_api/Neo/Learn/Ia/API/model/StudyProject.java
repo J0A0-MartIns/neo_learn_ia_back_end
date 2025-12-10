@@ -31,6 +31,10 @@ public class StudyProject {
     @JoinColumn(name = "study_project_id")
     private List<FileEntity> attachments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<StudySchedule> schedules;
+
+
     @Column(name = "is_public", nullable = false)
     private boolean isPublic = false;
 

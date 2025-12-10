@@ -7,6 +7,7 @@ import neo_learn_ia_api.Neo.Learn.Ia.API.model.MultipleChoiceQuestionEntity;
 import neo_learn_ia_api.Neo.Learn.Ia.API.model.StudySchedule;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.AnalizeDocumentWithAI;
 import neo_learn_ia_api.Neo.Learn.Ia.API.service.StudyScheduleService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class StudyScheduleController {
     private final StudyScheduleService studyScheduleService;
 
     @PostMapping(value = "/generate-questions")
-    public Mono<List<MultipleChoiceQuestionEntity>> generateQuestions(@RequestBody MultipleChoiceQuizRequest request) {
+    public Mono<List<QuestionContent>> generateQuestions(@RequestBody MultipleChoiceQuizRequest request) {
         try {
             return analyzeFiles.generateMultipleChoiceQuestions(request);
         } catch (Exception e) {
@@ -63,6 +64,18 @@ public class StudyScheduleController {
     public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
             studyScheduleService.deleteScheduleById(id);
             return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/generate-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> generatePdf(@RequestBody QuizPdfRequestDto request) {
+
+        byte[] pdfBytes = studyScheduleService.generatePdf(request);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=quiz.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 
 }
